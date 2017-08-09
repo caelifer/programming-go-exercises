@@ -6,14 +6,11 @@ import (
 	"image/color"
 	"image/gif"
 	"io"
+	"log"
 	"math"
 	"math/rand"
-	"os"
-)
-
-import (
-	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
