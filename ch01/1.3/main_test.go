@@ -26,6 +26,11 @@ func BenchmarkSpeed(b *testing.B) {
 	}
 }
 
+var (
+	testInput     = []string{"Hello", "World"}
+	desiredResult = "Hello World"
+)
+
 var testCases = []struct {
 	name string
 	proc func(...string) string
@@ -35,14 +40,14 @@ var testCases = []struct {
 	{
 		"Slow",
 		slow,
-		[]string{"Hello", "World"},
-		"Hello World",
+		testInput,
+		desiredResult,
 	},
 	{
 		"Fast",
 		fast,
-		[]string{"Hello", "World"},
-		"Hello World",
+		testInput,
+		desiredResult,
 	},
 }
 
