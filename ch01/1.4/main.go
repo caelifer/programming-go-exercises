@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bufio"
+	"bytes"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -15,23 +15,37 @@ type info struct {
 	count int
 }
 
+type input struct {
+	name string
+	data []byte
+}
+
 func main() {
 	prog := filepath.Base(os.Args[0])
 	counts := make(map[string]info)
+	inputs := make([]input, 1)
 
-	// Collect stats
+	// Collect all input data
 	if len(os.Args[1:]) > 0 {
 		for _, fname := range os.Args[1:] {
-			f, err := os.Open(fname)
+			data, err := ioutil.ReadFile(fname)
 			if err != nil {
 				log.Printf("%s: failed to %v", prog, err)
 				continue
 			}
-			defer f.Close()
-			countLines(f, fname, counts)
+			inputs = append(inputs, input{filepath.Base(fname), data})
 		}
 	} else {
-		countLines(os.Stdin, "/dev/stdin", counts)
+		data, err := ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			log.Fatal("%s: failed to %v", prog, err)
+		}
+		inputs = []input{input{"/dev/stdin", data}}
+	}
+
+	// Collect stats
+	for _, input := range inputs {
+		countLines(input, counts)
 	}
 
 	// Display duplicates
@@ -42,26 +56,23 @@ func main() {
 	}
 }
 
-func countLines(r io.Reader, name string, counts map[string]info) {
-	input := bufio.NewScanner(r)
-	for input.Scan() {
-		if err := input.Err(); err != nil && err != io.EOF {
-			log.Fatal(err)
-		}
-
+func countLines(in input, counts map[string]info) {
+	// input := bufio.NewScanner(r)
+	input := bytes.Split(in.data, []byte("\n"))
+	for _, text := range input {
 		// Get text
-		text := input.Text()
+		line := string(text)
 		// Skip if text is empty
-		if text == "" {
+		if len(text) == 0 {
 			continue
 		}
 		// Get info from the map
-		info := counts[text]
+		info := counts[line]
 		// Update info
-		info.names = updateNames(info.names, filepath.Base(name))
+		info.names = updateNames(info.names, in.name)
 		info.count++
 		// Update map
-		counts[text] = info
+		counts[line] = info
 	}
 }
 
