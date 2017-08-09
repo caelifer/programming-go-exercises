@@ -16,13 +16,13 @@ import (
 
 var (
 	Green   = color.RGBA{0, 185, 0, 255}
-	Black   = color.Black
+	Black   = color.RGBA{0x0E, 0x0E, 0x0E, 192} // tansparency: 75%
 	palette = []color.Color{Black, Green}
 )
 
 const (
-	whiteIndex = 0 // first color in palette
-	blackIndex = 1 // next color in palette
+	backgroundColor = 0
+	foregroundColor = 1
 )
 
 func main() {
@@ -32,13 +32,12 @@ func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	if len(os.Args) > 1 && os.Args[1] == "web" {
-		//!+http
 		handler := func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "image/gif")
 			lissajous(w)
 		}
 		http.HandleFunc("/", handler)
-		//!-http
-		log.Fatal(http.ListenAndServe("localhost:8000", nil))
+		log.Fatal(http.ListenAndServe(":8000", nil))
 		return
 	}
 	lissajous(os.Stdout)
@@ -48,7 +47,7 @@ func lissajous(out io.Writer) {
 	const (
 		cycles    = 10              // number of complete x oscillator revolutions
 		res       = 0.001           // angular resolution
-		nframes   = 256             // number of animation frames
+		nframes   = 64              // number of animation frames
 		delay     = 8               // delay between frames in 10ms units
 		sizeScale = 3               // size multiplier
 		size      = sizeScale * 100 // image canvas covers [-size..+size]
@@ -69,7 +68,7 @@ func lissajous(out io.Writer) {
 				img.SetColorIndex(
 					size+int(x*size+0.5),
 					size+int(y*size+0.5),
-					blackIndex)
+					foregroundColor)
 			}
 			phase += 0.1
 			anim.Delay = append(anim.Delay, delay)
