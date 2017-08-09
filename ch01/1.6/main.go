@@ -16,7 +16,7 @@ import (
 
 var (
 	Black   = color.RGBA{0x0E, 0x0E, 0x0E, 192} // tansparency: 75%
-	palette = []color.Color{Black}
+	palette = []color.Color{Black}              // set background
 )
 
 func init() {
@@ -32,11 +32,6 @@ func init() {
 		palette = append(palette, clr)
 	}
 }
-
-const (
-	backgroundColor = 0
-	foregroundColor = 1
-)
 
 func main() {
 	// The sequence of images is deterministic unless we seed
